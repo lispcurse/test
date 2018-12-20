@@ -1,4 +1,5 @@
-(ns lispcurse.test)
+(ns lispcurse.test
+  (:require [lispcurse.reporters.default :as default]))
 
 (defmacro deftest
   [name & targs]
@@ -31,7 +32,7 @@
   (fn [global-state]
     (doseq [{:keys [ns tests] :as suite} suites]
       (report-all reporters {:type :begin-test-suite
-                :ns ns})
+                             :ns ns})
       (let [suite-result (apply-middleware (:middleware suite)
                                            (run-tests tests reporters)
                                            global-state)]
@@ -41,12 +42,15 @@
 
 (defn run-plan
   [{:keys [suites middleware reporters] :as test-plan}]
-  (when (seq suites)
-    (report-all reporters {:type :begin-test-run})
-    (apply-middleware middleware
-                      (run-suites suites reporters)
-                      {})
-    (report-all reporters {:type :end-test-run})))
+  (let [reporters (if (seq reporters)
+                    reporters
+                    [default/reporter])]
+    (when (seq suites)
+      (report-all reporters {:type :begin-test-run})
+      (apply-middleware middleware
+                        (run-suites suites reporters)
+                        {})
+      (report-all reporters {:type :end-test-run}))))
 
 #_{:suites [{:ns (str *ns*)
              :middleware [adds-suite]
