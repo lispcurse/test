@@ -47,3 +47,11 @@
                       (run-suites suites reporters)
                       {})
     (report-all reporters {:type :end-test-run})))
+
+#_{:suites [{:ns (str *ns*)
+             :middleware [adds-suite]
+             :tests [#'my-unit-test
+                     #'my-other-unit-test]}]
+   :middleware [adds-global]
+   :reporters [(fn [event]
+                 (println event))]}
