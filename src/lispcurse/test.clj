@@ -32,15 +32,18 @@
        (try
          ~@tdecl
          {:type :pass
-          :state ~(first args)}
+          :state ~(first args)
+          :meta ~m}
          (catch AssertionError ae#
            {:type :fail
             :failure ae#
-            :state ~(first args)})
+            :state ~(first args)
+            :meta ~m})
          (catch Throwable t#
            {:type :error
             :error t#
-            :state ~(first args)})))))
+            :state ~(first args)
+            :meta ~m})))))
 
 ;; Test Running
 
