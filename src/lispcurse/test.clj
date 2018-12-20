@@ -1,10 +1,34 @@
 (ns lispcurse.test
   (:require [lispcurse.reporters.default :as default]))
 
+;; Assertions
+
+(defmacro assert-expr
+  [msg form])
+
+(defmacro is
+  ([form] `(is ~form nil))
+  ([form msg] `(assert-expr ~msg ~form)))
+
+
+;; Test DSL
+
 (defmacro deftest
-  [name & targs]
-  `(do (defn ~name ~@targs)
-       (alter-meta! (var ~name) assoc :type :test)))
+  [name & tdecl]
+  (assert (symbol? name) "First argument of deftest must be a symbol")
+  (let [[m tdecl] (if (string? (first tdecl))
+                    [{:doc (first tdecl)} (rest tdecl)]
+                    [{} tdecl])
+        [m tdecl] (if (map? (first tdecl))
+                    [(conj m (first tdecl)) (rest tdecl)]
+                    [m tdecl])
+        [args tdecl] (if (vector? (first tdecl))
+                       [(first tdecl) (rest tdecl)]
+                       ['[state] tdecl])]
+    (assert (= (count args) 1) "deftest only takes a single argument")
+    `(defn ~name ~(assoc m :type :test) ~args ~@tdecl)))
+
+;; Test Running
 
 (defn report-all
   [reporters event]
