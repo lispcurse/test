@@ -7,6 +7,14 @@
   [state]
   {:state state})
 
+(deftest a-failing-test
+  [state]
+  (throw (AssertionError. "this test always fails")))
+
+(deftest an-erroring-test
+  [state]
+  (throw (Exception. "this test always errors")))
+
 (= (:doc (meta #'a-test)) "an alternative name for this test")
 (= (:tags (meta #'a-test)) [:unit])
 (= (:type (meta #'a-test)) :test)
@@ -19,4 +27,6 @@
 
 (run-plan {:suites [{:ns (str *ns*)
                      :tests [#'a-test
-                             #'an-old-test]}]})
+                             #'an-old-test
+                             #'a-failing-test
+                             #'an-erroring-test]}]})

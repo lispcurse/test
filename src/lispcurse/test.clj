@@ -26,7 +26,21 @@
                        [(first tdecl) (rest tdecl)]
                        ['[state] tdecl])]
     (assert (= (count args) 1) "deftest only takes a single argument")
-    `(defn ~name ~(assoc m :type :test) ~args ~@tdecl)))
+    `(defn ~name
+       ~(assoc m :type :test)
+       ~args
+       (try
+         ~@tdecl
+         {:type :pass
+          :state ~(first args)}
+         (catch AssertionError ae#
+           {:type :fail
+            :failure ae#
+            :state ~(first args)})
+         (catch Throwable t#
+           {:type :error
+            :error t#
+            :state ~(first args)})))))
 
 ;; Test Running
 
